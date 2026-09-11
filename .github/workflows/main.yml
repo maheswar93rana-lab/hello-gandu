@@ -1,0 +1,41 @@
+name: Terraform CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init - Parent Module
+        working-directory: parent_module
+        run: terraform init -backend=false
+
+      - name: Terraform Validate - Parent Module
+        working-directory: parent_module
+        run: terraform validate
+
+      - name: Terraform Init - Child Module
+        working-directory: child_module
+        run: terraform init -backend=false
+
+      - name: Terraform Validate - Child Module
+        working-directory: child_module
+        run: terraform validate
